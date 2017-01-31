@@ -1,0 +1,41 @@
+QUERY CLASSIFICA REGATA
+
+SELECT Nome,Cognome,Posizione 
+from Partecipante join Regata on Id_regata = Id_regata_p  
+where Nome_regata='VI tappa campionato zonale' AND Classe='inserire classe desiderata'
+order by Posizione
+
+QUERY AGGIUNGERE UTENTE
+
+Tutti i permessi.
+INSERT INTO `login`(`username`, `password`, `Permessi`) VALUES ("Utente",sha1("prova"),"ALL")
+Permessi limitati alla zona
+INSERT INTO `login`(`username`, `password`, `Permessi`) VALUES ("Utente",sha1("prova"),"V_Zona")
+
+
+
+
+$index=0;
+ $array=array();
+ $pos=array();
+		foreach( $data as $el ) {
+		   $array[$index]=$el;
+		   if(count($array)==3){
+		   	
+		   	list($nome,$cognome)= split(" ", $array[1],2);
+		   		mysql_query("INSERT INTO Partecipante_temp  (Nome, Cognome, Classe,Posizione,username) 
+            VALUES ('".$nome."','".$cognome."','Standard','". $array[0]."','".$_SESSION[cod]."')") or die(mysql_error());
+		   		$posizioni=mysql_query("SELECT Posizione FROM `Partecipante` JOIN `Regata` ON Id_regata=Id_regata_p  where  Nome= '$nome' AND Cognome= '$cognome' AND Classe='Standard' AND Zona='Nazionale'") or die(mysql_error());
+		   	$i=1;
+		   	$pos[0]=(3*(53 - $array[0] + 1)) / 53;
+		   	while($array2=mysql_fetch_assoc($posizioni)) {
+		            $pos[$i] = (3*(53 - $array2['Posizione'] + 1)) / 53;
+		           // $a=$a+$parz;
+		            $i=$i+1;
+            	}
+			$a=array_sum($pos);
+          	mysql_query("INSERT INTO Ranking_temp  (Nome, Cognome, Punteggio, Classe, username) 
+                  VALUES ('".$nome."','".$cognome."','".$a."','Standard','".$_SESSION[cod]."')") or die(mysql_error());
+		   }
+		 $index=$index+1;      
+		}
